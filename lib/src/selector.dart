@@ -12,7 +12,7 @@ import 'package:emoji_selector/src/skin_tone_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-class EmojiData {
+class EmojiSource {
   static List<EmojiInternalData>? _cachedResult;
 
   static Future<List<EmojiInternalData>> loadEmoji() async {
@@ -371,7 +371,7 @@ class _EmojiSelectorState extends State<EmojiSelector> {
   }
 
   loadEmoji(BuildContext context) async {
-    _emojis.addAll(await EmojiData.loadEmoji());
+    _emojis.addAll(await EmojiSource.loadEmoji());
 
     // Per Category, create pages
     for (Category category in order) {
