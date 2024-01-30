@@ -12,6 +12,37 @@ import 'package:emoji_selector/src/skin_tone_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+class EmojiData {
+  static List<EmojiInternalData>? _cachedResult;
+
+  static Future<List<EmojiInternalData>> loadEmoji() async {
+    if (_cachedResult != null) return _cachedResult!;
+
+    final List<EmojiInternalData> _emojis = [];
+    const path = 'packages/emoji_selector/data/emoji.json';
+
+    String data = await rootBundle.loadString(path);
+    final emojiList = json.decode(data);
+
+    for (var emojiJson in emojiList) {
+      EmojiInternalData data = EmojiInternalData.fromJson(emojiJson);
+      _emojis.add(data);
+    }
+
+    _cachedResult = _emojis;
+
+    return _emojis;
+  }
+
+  static Future<EmojiInternalData> getRandomEmoji() async {
+    final emojis = await loadEmoji();
+    final random = Random();
+    final randIndex = random.nextInt(emojis.length);
+
+    return emojis.elementAt(randIndex);
+  }
+}
+
 class EmojiSelector extends StatefulWidget {
   final int columns;
   final int rows;
@@ -340,13 +371,8 @@ class _EmojiSelectorState extends State<EmojiSelector> {
   }
 
   loadEmoji(BuildContext context) async {
-    const path = 'packages/emoji_selector/data/emoji.json';
-    String data = await rootBundle.loadString(path);
-    final emojiList = json.decode(data);
-    for (var emojiJson in emojiList) {
-      EmojiInternalData data = EmojiInternalData.fromJson(emojiJson);
-      _emojis.add(data);
-    }
+    _emojis.addAll(await EmojiData.loadEmoji());
+
     // Per Category, create pages
     for (Category category in order) {
       Group group = _groups[category]!;
